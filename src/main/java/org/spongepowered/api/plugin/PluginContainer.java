@@ -27,6 +27,7 @@ package org.spongepowered.api.plugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -36,25 +37,52 @@ import java.util.Optional;
 public interface PluginContainer {
 
     /**
-     * Gets the id of the {@link Plugin} within this container.
+     * Gets the ID of the {@link Plugin} within this container.
      *
-     * @return The id
+     * @return The plugin ID
+     * @see Plugin#id()
      */
     String getId();
 
     /**
      * Gets the name of the {@link Plugin} within this container.
      *
-     * @return The name
+     * @return The plugin name
+     * @see Plugin#name()
      */
     String getName();
 
     /**
      * Gets the version of the {@link Plugin} within this container.
      *
-     * @return The name
+     * @return The plugin version
+     * @see Plugin#version()
      */
     String getVersion();
+
+    /**
+     * Gets the description of the {@link Plugin} within this container.
+     *
+     * @return The plugin description
+     * @see Plugin#description()
+     */
+    String getDescription();
+
+    /**
+     * Gets the url or website of the {@link Plugin} within this container.
+     *
+     * @return The plugin url
+     * @see Plugin#url()
+     */
+    String getUrl();
+
+    /**
+     * Gets the authors of the {@link Plugin} within this container.
+     *
+     * @return The plugin authors
+     * @see Plugin#authors()
+     */
+    List<String> getAuthors();
 
     /**
      * Returns the assigned logger to this {@link Plugin}.

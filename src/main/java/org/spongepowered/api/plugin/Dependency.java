@@ -24,67 +24,38 @@
  */
 package org.spongepowered.api.plugin;
 
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * An annotation used to describe and mark a Sponge plugin.
+ * Represents a dependency for a {@link Plugin}.
  */
-@Target(ElementType.TYPE)
+@Target({})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Plugin {
+public @interface Dependency {
 
     /**
-     * An ID for the plugin to be used internally. The ID should be unique as to
-     * not conflict with other plugins.
+     * The plugin ID of the dependency.
      *
-     * @return The plugin identifier
+     * @return The dependency plugin ID
+     * @see Plugin#id()
      */
     String id();
 
     /**
-     * The human readable name of the plugin as to be used in descriptions and
-     * similar things.
+     * The required version of the dependency.
      *
-     * @return The plugin name, or an empty string if unknown
+     * @return The required version, or an empty string if unspecified
      */
-    String name() default "";
+    String version() default ""; // TODO: Maven version ranges
 
     /**
-     * The version of the plugin.
+     * If this dependency is required for the plugin to work. By default
+     * this is {@code true}.
      *
-     * @return The plugin version, or an empty string if unknown
+     * @return True if the dependency is required for the plugin to work
      */
-    String version() default "";
-
-    /**
-     * The description of the plugin, explaining what it can be used for.
-     *
-     * @return The plugin description, or an empty string if unknown
-     */
-    String description() default "";
-
-    /**
-     * The URL or website of the plugin.
-     *
-     * @return The plugin url, or an empty string if unknown
-     */
-    String url() default "";
-
-    /**
-     * The authors of the plugin.
-     *
-     * @return The plugin authors, or empty if unknown
-     */
-    String[] authors() default {};
-
-    /**
-     * The dependencies required to load <strong>before</strong> this plugin.
-     *
-     * @return The plugin dependencies
-     */
-    Dependency[] dependencies() default {};
+    boolean required() default true;
 
 }
