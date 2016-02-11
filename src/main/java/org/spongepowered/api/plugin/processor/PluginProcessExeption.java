@@ -22,40 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.api.plugin;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package org.spongepowered.api.plugin.processor;
 
 /**
- * Represents a dependency for a {@link Plugin}.
+ * Thrown if an exception occurs in the plugin annotation processor.
  */
-@Target({})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Dependency {
+final class PluginProcessExeption extends RuntimeException {
 
-    /**
-     * The plugin ID of the dependency.
-     *
-     * @return The dependency plugin ID
-     * @see Plugin#id()
-     */
-    String id();
+    public PluginProcessExeption() {
+    }
 
-    /**
-     * The required version of the dependency.
-     *
-     * @return The required version, or an empty string if unspecified
-     */
-    String version() default ""; // TODO: Maven version ranges
+    public PluginProcessExeption(String message) {
+        super(message);
+    }
 
-    /**
-     * If this dependency is optional for the plugin to work. By default
-     * this is {@code false}.
-     *
-     * @return True if the dependency is optional for the plugin to work
-     */
-    boolean optional() default false;
+    public PluginProcessExeption(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public PluginProcessExeption(Throwable cause) {
+        super(cause);
+    }
 
 }

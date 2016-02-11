@@ -26,6 +26,10 @@ version = '3.1.0-SNAPSHOT'
 ext.api = project
 apply from: 'gradle/sponge.gradle'
 
+repositories {
+    mavenLocal() // TODO
+}
+
 // Project dependencies
 dependencies {
     // Logging
@@ -40,6 +44,9 @@ dependencies {
 
     // Dependency injection
     compile 'com.google.inject:guice:4.0'
+
+    // Plugin meta
+    compile 'org.spongepowered:plugin-meta:0.1-SNAPSHOT'
 
     // Configuration
     compile 'ninja.leaping.configurate:configurate-hocon:3.1.1'
