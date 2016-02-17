@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,6 +54,16 @@ public interface PluginContainer {
      */
     default Optional<String> getName() {
         return Optional.empty();
+    }
+
+    /**
+     * Gets the display name of the {@link Plugin} within this container.
+     * This refers to either the plugin name or the plugin ID if unknown.
+     *
+     * @return The plugin display name
+     */
+    default String getDisplayName() {
+        return getName().orElse(getId());
     }
 
     /**
@@ -96,12 +107,14 @@ public interface PluginContainer {
     }
 
     /**
-     * Returns the assigned logger to this {@link Plugin}.
+     * Returns the source the plugin was loaded from.
      *
-     * @return The assigned logger
+     * @return The source the plugin was loaded from or {@link Optional#empty()}
+     *     if unknown
      */
-    default Logger getLogger() {
-        return LoggerFactory.getLogger(getId());
+    // TODO: Type of return value
+    default Optional<Path> getSource() {
+        return Optional.empty();
     }
 
     /**
@@ -110,5 +123,14 @@ public interface PluginContainer {
      * @return The instance if available
      */
     Optional<?> getInstance();
+
+    /**
+     * Returns the assigned logger to this {@link Plugin}.
+     *
+     * @return The assigned logger
+     */
+    default Logger getLogger() {
+        return LoggerFactory.getLogger(getId());
+    }
 
 }
