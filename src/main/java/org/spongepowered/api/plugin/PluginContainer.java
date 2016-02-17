@@ -52,18 +52,8 @@ public interface PluginContainer {
      * @return The plugin name, or {@link Optional#empty()} if unknown
      * @see Plugin#name()
      */
-    default Optional<String> getName() {
-        return Optional.empty();
-    }
-
-    /**
-     * Gets the display name of the {@link Plugin} within this container.
-     * This refers to either the plugin name or the plugin ID if unknown.
-     *
-     * @return The plugin display name
-     */
-    default String getDisplayName() {
-        return getName().orElse(getId());
+    default String getName() {
+        return getId();
     }
 
     /**
@@ -112,7 +102,7 @@ public interface PluginContainer {
      * @return The source the plugin was loaded from or {@link Optional#empty()}
      *     if unknown
      */
-    default Optional<?> getSource() {
+    default Optional<Path> getSource() {
         return Optional.empty();
     }
 
