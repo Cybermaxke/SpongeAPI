@@ -24,6 +24,7 @@
  */
 package org.spongepowered.api.plugin;
 
+import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,42 +48,52 @@ public interface PluginContainer {
     /**
      * Gets the name of the {@link Plugin} within this container.
      *
-     * @return The plugin name
+     * @return The plugin name, or {@link Optional#empty()} if unknown
      * @see Plugin#name()
      */
-    String getName();
+    default Optional<String> getName() {
+        return Optional.empty();
+    }
 
     /**
      * Gets the version of the {@link Plugin} within this container.
      *
-     * @return The plugin version
+     * @return The plugin version, or {@link Optional#empty()} if unknown
      * @see Plugin#version()
      */
-    String getVersion();
+    default Optional<String> getVersion() {
+        return Optional.empty();
+    }
 
     /**
      * Gets the description of the {@link Plugin} within this container.
      *
-     * @return The plugin description
+     * @return The plugin description, or {@link Optional#empty()} if unknown
      * @see Plugin#description()
      */
-    String getDescription();
+    default Optional<String> getDescription() {
+        return Optional.empty();
+    }
 
     /**
      * Gets the url or website of the {@link Plugin} within this container.
      *
-     * @return The plugin url
+     * @return The plugin url, or {@link Optional#empty()} if unknown
      * @see Plugin#url()
      */
-    String getUrl();
+    default Optional<String> getUrl() {
+        return Optional.empty();
+    }
 
     /**
      * Gets the authors of the {@link Plugin} within this container.
      *
-     * @return The plugin authors
+     * @return The plugin authors, or empty if unknown
      * @see Plugin#authors()
      */
-    List<String> getAuthors();
+    default List<String> getAuthors() {
+        return ImmutableList.of();
+    }
 
     /**
      * Returns the assigned logger to this {@link Plugin}.
@@ -98,6 +109,6 @@ public interface PluginContainer {
      *
      * @return The instance if available
      */
-    Optional<Object> getInstance();
+    Optional<?> getInstance();
 
 }
