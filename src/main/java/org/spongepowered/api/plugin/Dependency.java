@@ -31,8 +31,8 @@ import java.lang.annotation.Target;
 /**
  * Represents a dependency for a {@link Plugin}.
  */
-@Target({})
 @Retention(RetentionPolicy.RUNTIME)
+@Target({})
 public @interface Dependency {
 
     /**

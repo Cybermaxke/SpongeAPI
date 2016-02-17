@@ -32,8 +32,8 @@ import java.lang.annotation.Target;
 /**
  * An annotation used to describe and mark a Sponge plugin.
  */
-@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
 public @interface Plugin {
 
     /**
@@ -60,6 +60,13 @@ public @interface Plugin {
     String version() default "";
 
     /**
+     * The dependencies required to load <strong>before</strong> this plugin.
+     *
+     * @return The plugin dependencies
+     */
+    Dependency[] dependencies() default {};
+
+    /**
      * The description of the plugin, explaining what it can be used for.
      *
      * @return The plugin description, or an empty string if unknown
@@ -79,12 +86,5 @@ public @interface Plugin {
      * @return The plugin authors, or empty if unknown
      */
     String[] authors() default {};
-
-    /**
-     * The dependencies required to load <strong>before</strong> this plugin.
-     *
-     * @return The plugin dependencies
-     */
-    Dependency[] dependencies() default {};
 
 }
