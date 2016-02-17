@@ -112,8 +112,7 @@ public interface PluginContainer {
      * @return The source the plugin was loaded from or {@link Optional#empty()}
      *     if unknown
      */
-    // TODO: Type of return value
-    default Optional<Path> getSource() {
+    default Optional<?> getSource() {
         return Optional.empty();
     }
 
