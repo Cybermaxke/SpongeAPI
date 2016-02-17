@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
 import static javax.tools.Diagnostic.Kind.WARNING;
+import static org.spongepowered.api.plugin.Plugin.ID_PATTERN;
 
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
@@ -36,14 +37,11 @@ import org.spongepowered.plugin.meta.PluginMetadata;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.regex.Pattern;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.TypeElement;
 
 final class PluginElement {
-
-    private static final Pattern ID_PATTERN = Pattern.compile("[a-z0-9-_]+");
 
     private final TypeElement element;
     private final AnnotationWrapper<Plugin> annotation;

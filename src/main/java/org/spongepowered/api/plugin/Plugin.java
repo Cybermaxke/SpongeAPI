@@ -28,6 +28,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.regex.Pattern;
 
 /**
  * An annotation used to describe and mark a Sponge plugin.
@@ -35,6 +36,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Plugin {
+
+    Pattern ID_PATTERN = Pattern.compile("[a-z0-9-_]+");
 
     /**
      * An ID for the plugin to be used internally. The ID should be unique as to
