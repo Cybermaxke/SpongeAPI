@@ -59,25 +59,26 @@ import java.util.Map;
  */
 public class TextTemplateConfigSerializer implements TypeSerializer<TextTemplate> {
 
-    private static final String ARG_OPEN = "{";
-    private static final String ARG_CLOSE = "}";
-
     private static final String NODE_CONTENT = "content";
     private static final String NODE_ARGS = "arguments";
     private static final String NODE_OPT = "optional";
+    private static final String NODE_OPEN_ARG = "openArg";
+    private static final String NODE_CLOSE_ARG = "closeArg";
 
     @Override
     public TextTemplate deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
+        String openArg = value.getNode(NODE_OPEN_ARG).getString(TextTemplate.DEFAULT_OPEN_ARG);
+        String closeArg = value.getNode(NODE_CLOSE_ARG).getString(TextTemplate.DEFAULT_CLOSE_ARG);
         Text content = value.getNode(NODE_CONTENT).getValue(TypeToken.of(Text.class));
         List<Object> elements = new ArrayList<>();
         elements.add(content.getFormat());
-        if (isArg(content, value)) {
-            elements.add(parseArg((LiteralText) content, value));
+        if (isArg(content, value, openArg, closeArg)) {
+            elements.add(parseArg((LiteralText) content, value, openArg, closeArg));
         }
 
         for (Text child : content.getChildren()) {
-            if (isArg(child, value)) {
-                elements.add(parseArg((LiteralText) child, value));
+            if (isArg(child, value, openArg, closeArg)) {
+                elements.add(parseArg((LiteralText) child, value, openArg, closeArg));
             } else {
                 elements.add(child);
             }
@@ -88,32 +89,38 @@ public class TextTemplateConfigSerializer implements TypeSerializer<TextTemplate
 
     @Override
     public void serialize(TypeToken<?> type, TextTemplate obj, ConfigurationNode value) throws ObjectMappingException {
+        String openArg = obj.getOpenArgString(), closeArg = obj.getCloseArgString();
+        if (!openArg.equals(TextTemplate.DEFAULT_OPEN_ARG) || !closeArg.equals(TextTemplate.DEFAULT_CLOSE_ARG)) {
+            // only display if different from default, reduces clutter
+            value.getNode(NODE_OPEN_ARG).setValue(openArg);
+            value.getNode(NODE_CLOSE_ARG).setValue(closeArg);
+        }
         value.getNode(NODE_ARGS).setValue(new TypeToken<Map<String, TextTemplate.Arg>>() {}, obj.getArguments());
         value.getNode(NODE_CONTENT).setValue(TypeToken.of(Text.class), obj.toText());
     }
 
-    private static boolean isArg(Text element, ConfigurationNode root) {
-        // Returns true if the element is enclosed by curly braces and the parameter is defined
+    private static boolean isArg(Text element, ConfigurationNode root, String openArg, String closeArg) {
+        // Returns true if the element is enclosed by the arg container and the parameter is defined
         if (!(element instanceof LiteralText)) {
             return false;
         }
         String literal = ((LiteralText) element).getContent();
-        return literal.startsWith(ARG_OPEN) && literal.endsWith(ARG_CLOSE)
-                && isArgDefined(unwrap(literal), root);
+        return literal.startsWith(openArg) && literal.endsWith(closeArg)
+                && isArgDefined(unwrap(literal, openArg, closeArg), root);
     }
 
-    private static TextTemplate.Arg.Builder parseArg(LiteralText source, ConfigurationNode root) {
+    private static TextTemplate.Arg.Builder parseArg(LiteralText source, ConfigurationNode root, String openArg, String closeArg) {
         // Creates a new Arg from Text source
         // Assumption: isArg(source, root) returns true
-        String name = unwrap(source.getContent());
+        String name = unwrap(source.getContent(), openArg, closeArg);
         boolean optional = root.getNode(NODE_ARGS, name, NODE_OPT).getBoolean();
         TextFormat format = source.getFormat();
         return TextTemplate.arg(name).format(format).optional(optional);
     }
 
-    private static String unwrap(String str) {
-        // Unwraps an argument from curly braces
-        return str.substring(1, str.length() - 1);
+    private static String unwrap(String str, String openArg, String closeArg) {
+        // Unwraps an argument from container
+        return str.substring(openArg.length(), str.length() - closeArg.length());
     }
 
 

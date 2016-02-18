@@ -59,15 +59,28 @@ public class TextTemplate implements TextRepresentable {
     }
 
     /**
+     * Default "open" String for how arguments are contained within the template.
+     */
+    public static final String DEFAULT_OPEN_ARG = "{";
+
+    /**
+     * Default "close" String for how arguments are contained within the template.
+     */
+    public static final String DEFAULT_CLOSE_ARG = "}";
+
+    /**
      * Empty representation of a {@link TextTemplate}. This is returned if the
      * array supplied to {@link #of(Object...)} is empty.
      */
-    public static final TextTemplate EMPTY = new TextTemplate();
+    public static final TextTemplate EMPTY = new TextTemplate(DEFAULT_OPEN_ARG, DEFAULT_CLOSE_ARG, new Object[]{});
 
     protected final List<Object> elements = new ArrayList<>();
     protected final Map<String, Arg> arguments = new HashMap<>();
+    protected final String openArg, closeArg;
 
-    protected TextTemplate(Object... elements) {
+    protected TextTemplate(String openArg, String closeArg, Object[] elements) {
+        this.openArg = openArg;
+        this.closeArg = closeArg;
         for (Object element : elements) {
             if (element instanceof Arg.Builder) {
                 element = ((Arg.Builder) element).build();
@@ -102,6 +115,24 @@ public class TextTemplate implements TextRepresentable {
      */
     public Map<String, Arg> getArguments() {
         return ImmutableBiMap.copyOf(this.arguments);
+    }
+
+    /**
+     * Returns the string used for containing Args within the template.
+     *
+     * @return String containing args
+     */
+    public String getOpenArgString() {
+        return openArg;
+    }
+
+    /**
+     * Returns the string used for containing Args within the template.
+     *
+     * @return String containing args
+     */
+    public String getCloseArgString() {
+        return closeArg;
     }
 
     /**
@@ -186,14 +217,42 @@ public class TextTemplate implements TextRepresentable {
      * object.</p>
      *
      * @param elements Elements to append to builder
+     * @param openArg String to use for beginning of Arg containers
+     * @param closeArg String to use for end of Arg containers
      * @return Newly constructed TextTemplate
      */
-    public static TextTemplate of(Object... elements) {
+    public static TextTemplate of(String openArg, String closeArg, Object[] elements) {
         checkNotNull(elements, "elements");
         if (elements.length == 0) {
             return of();
         }
-        return new TextTemplate(elements);
+        return new TextTemplate(openArg, closeArg, elements);
+    }
+
+    /**
+     * Constructs a new TextTemplate for the given elements. The order of the
+     * elements is the order in which they will be appended to the result
+     * builder via {@link #apply(Map)}.
+     *
+     * <p>The provided elements may be of any type.</p>
+     *
+     * <p>In the case that an element is a {@link TextElement},
+     * {@link TextElement#applyTo(Text.Builder)} will be used to append the
+     * element to the builder.</p>
+     *
+     * <p>In the case that an element is an {@link Arg} the argument will be
+     * replaced with the {@link TextElement} provided by the corresponding
+     * parameter supplied by {@link #apply(Map)}</p>
+     *
+     * <p>In the case that an element is any other type, the parameter value's
+     * {@link Object#toString()} method will be used to create a {@link Text}
+     * object.</p>
+     *
+     * @param elements Elements to append to builder
+     * @return Newly constructed TextTemplate
+     */
+    public static TextTemplate of(Object... elements) {
+        return of(DEFAULT_OPEN_ARG, DEFAULT_CLOSE_ARG, elements);
     }
 
     /**
