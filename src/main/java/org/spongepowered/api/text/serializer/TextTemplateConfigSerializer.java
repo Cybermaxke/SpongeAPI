@@ -28,6 +28,7 @@ import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextTemplate;
@@ -65,25 +66,18 @@ public class TextTemplateConfigSerializer implements TypeSerializer<TextTemplate
     private static final String NODE_OPEN_ARG = "openArg";
     private static final String NODE_CLOSE_ARG = "closeArg";
 
+    private ConfigurationNode root;
+    private String openArg;
+    private String closeArg;
+
     @Override
     public TextTemplate deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
-        String openArg = value.getNode(NODE_OPEN_ARG).getString(TextTemplate.DEFAULT_OPEN_ARG);
-        String closeArg = value.getNode(NODE_CLOSE_ARG).getString(TextTemplate.DEFAULT_CLOSE_ARG);
+        this.root = value;
+        this.openArg = value.getNode(NODE_OPEN_ARG).getString(TextTemplate.DEFAULT_OPEN_ARG);
+        this.closeArg = value.getNode(NODE_CLOSE_ARG).getString(TextTemplate.DEFAULT_CLOSE_ARG);
         Text content = value.getNode(NODE_CONTENT).getValue(TypeToken.of(Text.class));
         List<Object> elements = new ArrayList<>();
-        elements.add(content.getFormat());
-        if (isArg(content, value, openArg, closeArg)) {
-            elements.add(parseArg((LiteralText) content, value, openArg, closeArg));
-        }
-
-        for (Text child : content.getChildren()) {
-            if (isArg(child, value, openArg, closeArg)) {
-                elements.add(parseArg((LiteralText) child, value, openArg, closeArg));
-            } else {
-                elements.add(child);
-            }
-        }
-
+        parse(elements, content);
         return TextTemplate.of(elements.toArray(new Object[elements.size()]));
     }
 
@@ -99,33 +93,39 @@ public class TextTemplateConfigSerializer implements TypeSerializer<TextTemplate
         value.getNode(NODE_CONTENT).setValue(TypeToken.of(Text.class), obj.toText());
     }
 
-    private static boolean isArg(Text element, ConfigurationNode root, String openArg, String closeArg) {
-        // Returns true if the element is enclosed by the arg container and the parameter is defined
+    private void parse(List<Object> into, Text content) {
+        Sponge.getServer().getConsole().sendMessage(content);
+        if (isArg(content)) {
+            parseArg(into, (LiteralText) content);
+        } else {
+            into.add(content.toBuilder().removeAll().build());
+        }
+        content.getChildren().stream().forEach(c -> parse(into, c));
+    }
+
+    private void parseArg(List<Object> into, LiteralText source) {
+        String name = unwrap(source.getContent(), this.openArg, this.closeArg);
+        boolean optional = this.root.getNode(NODE_ARGS, name, NODE_OPT).getBoolean();
+        TextFormat format = source.getFormat();
+        TextTemplate.Arg arg = TextTemplate.arg(name).format(format).optional(optional).build();
+        into.add(arg);
+    }
+
+    private boolean isArg(Text element) {
         if (!(element instanceof LiteralText)) {
             return false;
         }
         String literal = ((LiteralText) element).getContent();
-        return literal.startsWith(openArg) && literal.endsWith(closeArg)
-                && isArgDefined(unwrap(literal, openArg, closeArg), root);
-    }
-
-    private static TextTemplate.Arg.Builder parseArg(LiteralText source, ConfigurationNode root, String openArg, String closeArg) {
-        // Creates a new Arg from Text source
-        // Assumption: isArg(source, root) returns true
-        String name = unwrap(source.getContent(), openArg, closeArg);
-        boolean optional = root.getNode(NODE_ARGS, name, NODE_OPT).getBoolean();
-        TextFormat format = source.getFormat();
-        return TextTemplate.arg(name).format(format).optional(optional);
+        return literal.startsWith(this.openArg) && literal.endsWith(this.closeArg)
+                && isArgDefined(unwrap(literal, this.openArg, this.closeArg), this.root);
     }
 
     private static String unwrap(String str, String openArg, String closeArg) {
-        // Unwraps an argument from container
         return str.substring(openArg.length(), str.length() - closeArg.length());
     }
 
 
     private static boolean isArgDefined(String argName, ConfigurationNode root) {
-        // Returns true if the arg is defined in the "arguments" node
         return !root.getNode(NODE_ARGS, argName).isVirtual();
     }
 }
