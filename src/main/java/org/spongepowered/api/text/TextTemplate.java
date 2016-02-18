@@ -351,9 +351,28 @@ public class TextTemplate implements TextRepresentable {
             return format;
         }
 
+        /**
+         * Returns the beginning string of the Arg's container.
+         *
+         * @return Open string
+         */
+        public Optional<String> getOpenArgString() {
+            return Optional.ofNullable(openArg);
+        }
+
+        /**
+         * Returns the end string of the Arg's container.
+         *
+         * @return Close string
+         */
+        public Optional<String> getCloseArgString() {
+            return Optional.ofNullable(closeArg);
+        }
+
         @Override
         public Text toText() {
-            return Text.builder(openArg + this.name + closeArg).format(this.format).build();
+            return Text.builder(getOpenArgString().orElse("") + this.name + getCloseArgString().orElse(""))
+                    .format(this.format).build();
         }
 
         @Override
