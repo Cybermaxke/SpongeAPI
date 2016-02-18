@@ -27,8 +27,8 @@ package org.spongepowered.api.text;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
@@ -116,7 +116,7 @@ public class TextTemplate implements TextRepresentable {
      * @return The arguments within this TextTemplate
      */
     public Map<String, Arg> getArguments() {
-        return ImmutableBiMap.copyOf(this.arguments);
+        return ImmutableMap.copyOf(this.arguments);
     }
 
     /**
