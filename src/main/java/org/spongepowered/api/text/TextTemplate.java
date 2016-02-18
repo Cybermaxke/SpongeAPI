@@ -298,6 +298,16 @@ public class TextTemplate implements TextRepresentable {
         return Optional.ofNullable(builder).orElse(Text.builder()).build();
     }
 
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(TextTemplate.class)
+                .add("elements", this.elements)
+                .add("arguments", this.arguments)
+                .add("openArg", this.openArg)
+                .add("closeArg", this.closeArg)
+                .toString();
+    }
+
     /**
      * Represents a variable element within a TextTemplate. Arguments are
      * replaced by parameters in {@link #apply(Map)}.
@@ -377,6 +387,18 @@ public class TextTemplate implements TextRepresentable {
         }
 
         @Override
+        public String toString() {
+            return Objects.toStringHelper(Arg.class)
+                    .omitNullValues()
+                    .add("optional", optional)
+                    .add("name", name)
+                    .add("format", this.format.isEmpty() ? null : this.format)
+                    .add("openArg", openArg)
+                    .add("closeArg", closeArg)
+                    .toString();
+        }
+
+        @Override
         public int hashCode() {
             return Objects.hashCode(this.name, this.optional);
         }
@@ -394,7 +416,7 @@ public class TextTemplate implements TextRepresentable {
          * Represents a builder for {@link Arg}s.
          */
         public static class Builder {
-            
+
             protected final String name;
             protected boolean optional = false;
             protected TextFormat format = TextFormat.NONE;
