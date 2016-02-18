@@ -76,7 +76,8 @@ public class TextTemplate implements TextRepresentable {
 
     protected final List<Object> elements = new ArrayList<>();
     protected final Map<String, Arg> arguments = new HashMap<>();
-    protected final String openArg, closeArg;
+    protected final String openArg;
+    protected final String closeArg;
 
     protected TextTemplate(String openArg, String closeArg, Object[] elements) {
         this.openArg = openArg;
@@ -318,7 +319,8 @@ public class TextTemplate implements TextRepresentable {
         @Setting protected final boolean optional;
         protected final String name; // defined by node name
         protected final TextFormat format; // defined in "content" node
-        @Nullable protected String openArg, closeArg;
+        @Nullable protected String openArg;
+        @Nullable protected String closeArg;
 
         protected Arg(String name, boolean optional, TextFormat format) {
             this.name = name;
