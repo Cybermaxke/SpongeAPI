@@ -33,6 +33,8 @@ import static org.spongepowered.api.plugin.Plugin.ID_PATTERN;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.plugin.meta.PluginMetadata;
+import org.spongepowered.plugin.meta.version.InvalidVersionSpecificationException;
+import org.spongepowered.plugin.meta.version.VersionRange;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -103,10 +105,13 @@ final class PluginElement {
         if (!value.isEmpty()) {
             if (!isLikelyValidUrl(value)) {
                 messager.printMessage(ERROR, "Invalid URL: " + value, this.element, this.annotation.getMirror(), this.annotation.getValue("url"));
-                return;
             }
 
             this.metadata.setUrl(value);
+        } else if ((value = this.metadata.getUrl()) != null) {
+            if (!isLikelyValidUrl(value)) {
+                messager.printMessage(ERROR, "Invalid URL: " + value + " in extra metadata files", this.element, this.annotation.getMirror());
+            }
         }
 
         String[] authors = this.annotation.get().authors();
@@ -123,6 +128,10 @@ final class PluginElement {
             }
         }
 
+        checkDependencies(this.metadata.getRequiredDependencies(), messager);
+        checkDependencies(this.metadata.getLoadAfter(), messager);
+        checkDependencies(this.metadata.getLoadBefore(), messager);
+
         Dependency[] dependencies = this.annotation.get().dependencies();
         if (dependencies.length > 0) {
             for (Dependency dependency : dependencies) {
@@ -132,8 +141,33 @@ final class PluginElement {
                             this.annotation.getValue("dependencies"));
                 }
 
+                final String version = dependency.version();
+                if (!version.isEmpty()) {
+                    try {
+                        VersionRange.createFromVersionSpec(version);
+                    } catch (InvalidVersionSpecificationException e) {
+                        messager.printMessage(ERROR, "Invalid dependency version range: " + version + " (" + e.getMessage() +
+                                ") Please check the Javadocs of @Dependency.version() for details.",
+                                this.element, this.annotation.getMirror(), this.annotation.getValue("dependencies"));
+                    }
+                }
+
                 // TODO: Load order
                 this.metadata.loadAfter(new PluginMetadata.Dependency(id, dependency.version()), !dependency.optional());
+            }
+        }
+    }
+
+    private void checkDependencies(Iterable<PluginMetadata.Dependency> dependencies, Messager messager) {
+        for (PluginMetadata.Dependency dependency : dependencies) {
+            final String version = dependency.getVersion();
+            if (version != null) {
+                try {
+                    VersionRange.createFromVersionSpec(version);
+                } catch (InvalidVersionSpecificationException e) {
+                    messager.printMessage(ERROR, "Invalid dependency version range from extra metadata file: " + version + " (" + e.getMessage() +
+                            ") Please check the Javadocs of @Dependency.version() for details.", this.element, this.annotation.getMirror());
+                }
             }
         }
     }
