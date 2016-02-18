@@ -52,7 +52,7 @@ import javax.annotation.Nullable;
  * {@link Text.Builder}. Elements will be appended to the result builder in the
  * order that they are specified in {@link #of(Object...)}.
  */
-public class TextTemplate implements TextRepresentable {
+public final class TextTemplate implements TextRepresentable {
 
     static {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(TextTemplate.class), new TextTemplateConfigSerializer());
@@ -74,32 +74,34 @@ public class TextTemplate implements TextRepresentable {
      */
     public static final TextTemplate EMPTY = new TextTemplate(DEFAULT_OPEN_ARG, DEFAULT_CLOSE_ARG, new Object[]{});
 
-    protected final List<Object> elements = new ArrayList<>();
-    protected final Map<String, Arg> arguments = new HashMap<>();
-    protected final String openArg;
-    protected final String closeArg;
+    final ImmutableList<Object> elements;
+    final ImmutableMap<String, Arg> arguments;
+    final String openArg;
+    final String closeArg;
 
-    protected TextTemplate(String openArg, String closeArg, Object[] elements) {
+    TextTemplate(String openArg, String closeArg, Object[] elements) {
         this.openArg = openArg;
         this.closeArg = closeArg;
+        List<Object> elementList = new ArrayList<>();
+        Map<String, Arg> argumentMap = new HashMap<>();
         for (Object element : elements) {
             if (element instanceof Arg.Builder) {
                 element = ((Arg.Builder) element).build();
             }
-            this.elements.add(element);
+            elementList.add(element);
             if (element instanceof Arg) {
                 // check for non-equal duplicate argument
-                Arg newArg = (Arg) element;
-                newArg.openArg = this.openArg;
-                newArg.closeArg = this.closeArg;
-                Arg oldArg = this.arguments.get(newArg.name);
+                Arg newArg = new Arg((Arg) element, this.openArg, this.closeArg);
+                Arg oldArg = argumentMap.get(newArg.name);
                 if (oldArg != null && !oldArg.equals(newArg)) {
                     throw new TextTemplateArgumentException("Tried to supply an unequal argument with a duplicate name \""
                             + newArg.name + "\" to TextTemplate.");
                 }
-                this.arguments.put(newArg.name, newArg);
+                argumentMap.put(newArg.name, newArg);
             }
         }
+        this.elements = ImmutableList.copyOf(elementList);
+        this.arguments = ImmutableMap.copyOf(argumentMap);
     }
 
     /**
@@ -108,7 +110,7 @@ public class TextTemplate implements TextRepresentable {
      * @return The elements within the template
      */
     public List<Object> getElements() {
-        return ImmutableList.copyOf(this.elements);
+        return this.elements;
     }
 
     /**
@@ -117,7 +119,7 @@ public class TextTemplate implements TextRepresentable {
      * @return The arguments within this TextTemplate
      */
     public Map<String, Arg> getArguments() {
-        return ImmutableMap.copyOf(this.arguments);
+        return this.arguments;
     }
 
     /**
@@ -314,21 +316,31 @@ public class TextTemplate implements TextRepresentable {
      * replaced by parameters in {@link #apply(Map)}.
      */
     @ConfigSerializable
-    public static class Arg implements TextRepresentable {
+    public final static class Arg implements TextRepresentable {
 
-        @Setting protected final boolean optional;
-        protected final String name; // defined by node name
-        protected final TextFormat format; // defined in "content" node
-        @Nullable protected String openArg;
-        @Nullable protected String closeArg;
+        @Setting final boolean optional;
+        final String name; // defined by node name
+        final TextFormat format; // defined in "content" node
+        final String openArg;
+        final String closeArg;
 
-        protected Arg(String name, boolean optional, TextFormat format) {
+        Arg(String name, boolean optional, TextFormat format, String openArg, String closeArg) {
             this.name = name;
             this.optional = optional;
             this.format = format;
+            this.openArg = openArg;
+            this.closeArg = closeArg;
         }
 
-        protected void checkOptional() {
+        Arg(String name, boolean optional, TextFormat format) {
+            this(name, optional, format, DEFAULT_OPEN_ARG, DEFAULT_CLOSE_ARG);
+        }
+
+        Arg(Arg arg, String openArg, String closeArg) {
+            this(arg.name, arg.optional, arg.format, openArg, closeArg);
+        }
+
+        void checkOptional() {
             if (!this.optional) {
                 throw new TextTemplateArgumentException("Missing required argument in TextTemplate \"" + this.name + "\".");
             }
@@ -369,8 +381,8 @@ public class TextTemplate implements TextRepresentable {
          *
          * @return Open string
          */
-        public Optional<String> getOpenArgString() {
-            return Optional.ofNullable(this.openArg);
+        public String getOpenArgString() {
+            return this.openArg;
         }
 
         /**
@@ -378,13 +390,13 @@ public class TextTemplate implements TextRepresentable {
          *
          * @return Close string
          */
-        public Optional<String> getCloseArgString() {
-            return Optional.ofNullable(this.closeArg);
+        public String getCloseArgString() {
+            return this.closeArg;
         }
 
         @Override
         public Text toText() {
-            return Text.builder(getOpenArgString().orElse("") + this.name + getCloseArgString().orElse(""))
+            return Text.builder(openArg + this.name + closeArg)
                     .format(this.format).build();
         }
 
@@ -417,13 +429,13 @@ public class TextTemplate implements TextRepresentable {
         /**
          * Represents a builder for {@link Arg}s.
          */
-        public static class Builder {
+        public static final class Builder {
 
-            protected final String name;
-            protected boolean optional = false;
-            protected TextFormat format = TextFormat.NONE;
+            final String name;
+            boolean optional = false;
+            TextFormat format = TextFormat.NONE;
 
-            protected Builder(String name) {
+            Builder(String name) {
                 this.name = name;
             }
 
