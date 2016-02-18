@@ -38,7 +38,6 @@ import org.spongepowered.api.text.format.TextFormat;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.serializer.TextTemplateConfigSerializer;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -82,7 +81,7 @@ public final class TextTemplate implements TextRepresentable {
     TextTemplate(String openArg, String closeArg, Object[] elements) {
         this.openArg = openArg;
         this.closeArg = closeArg;
-        List<Object> elementList = new ArrayList<>();
+        ImmutableList.Builder<Object> elementList = ImmutableList.builder();
         Map<String, Arg> argumentMap = new HashMap<>();
         for (Object element : elements) {
             if (element instanceof Arg.Builder) {
@@ -100,7 +99,7 @@ public final class TextTemplate implements TextRepresentable {
                 argumentMap.put(newArg.name, newArg);
             }
         }
-        this.elements = ImmutableList.copyOf(elementList);
+        this.elements = elementList.build();
         this.arguments = ImmutableMap.copyOf(argumentMap);
     }
 
