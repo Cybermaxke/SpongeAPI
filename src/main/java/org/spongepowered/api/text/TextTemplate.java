@@ -24,6 +24,7 @@
  */
 package org.spongepowered.api.text;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
@@ -226,6 +227,10 @@ public final class TextTemplate implements TextRepresentable {
      * @return Newly constructed TextTemplate
      */
     public static TextTemplate of(String openArg, String closeArg, Object[] elements) {
+        checkNotNull(openArg, "open arg");
+        checkArgument(!openArg.isEmpty(), "openArg cannot be empty");
+        checkNotNull(closeArg, "close arg");
+        checkArgument(!closeArg.isEmpty(), "closeArg cannot be empty");
         checkNotNull(elements, "elements");
         if (elements.length == 0) {
             return of();
@@ -395,8 +400,7 @@ public final class TextTemplate implements TextRepresentable {
 
         @Override
         public Text toText() {
-            return Text.builder(openArg + this.name + closeArg)
-                    .format(this.format).build();
+            return Text.builder(openArg + this.name + closeArg).format(this.format).build();
         }
 
         @Override
