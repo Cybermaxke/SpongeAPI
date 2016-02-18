@@ -218,15 +218,23 @@ public class TextTemplate implements TextRepresentable {
 
     @Override
     public Text toText() {
-        Text.Builder builder = Text.builder();
+        Text.Builder builder = null;
         for (Object element : this.elements) {
             if (element instanceof TextElement) {
+                if (builder == null) {
+                    builder = Text.builder();
+                }
                 ((TextElement) element).applyTo(builder);
             } else {
-                builder.append(Text.of(element.toString()));
+                String str = element.toString();
+                if (builder == null) {
+                    builder = Text.builder(str);
+                } else {
+                    builder.append(Text.of(str));
+                }
             }
         }
-        return builder.build();
+        return Optional.ofNullable(builder).orElse(Text.builder()).build();
     }
 
     /**
