@@ -44,11 +44,26 @@ public @interface Dependency {
     String id();
 
     /**
-     * The required version of the dependency.
+     * The required version range of the dependency in <b>Maven version range
+     * syntax</b>:
      *
-     * @return The required version, or an empty string if unspecified
+     * <table>
+     * <tr><th>Range</th><th>Meaning</th></tr>
+     * <tr><td>1.0</td><td>Any dependency version, 1.0 is recommended</td></tr>
+     * <tr><td>[1.0]</td><td>x == 1.0</td></tr>
+     * <tr><td>[1.0,)</td><td>x >= 1.0</td></tr>
+     * <tr><td>(1.0,)</td><td>x > 1.0</td></tr>
+     * <tr><td>(,1.0]</td><td>x <= 1.0</td></tr>
+     * <tr><td>(,1.0)</td><td>x < 1.0</td></tr>
+     * <tr><td>(1.0,2.0)</td><td>1.0 < x < 2.0</td></tr>
+     * <tr><td>[1.0,2.0]</td><td>1.0 <= x <= 2.0</td></tr>
+     * </table>
+     *
+     * @return The required version range, or an empty string if unspecified
+     * @see <a href="https://goo.gl/edrup4">Maven version range specification</a>
+     * @see <a href="https://goo.gl/WBsFIu">Maven version design document</a>
      */
-    String version() default ""; // TODO: Maven version ranges
+    String version() default "";
 
     /**
      * If this dependency is optional for the plugin to work. By default
