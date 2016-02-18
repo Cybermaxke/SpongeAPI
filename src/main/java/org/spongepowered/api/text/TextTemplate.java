@@ -304,6 +304,7 @@ public class TextTemplate implements TextRepresentable {
      */
     @ConfigSerializable
     public static class Arg implements TextRepresentable {
+
         @Setting protected final boolean optional;
         protected final String name; // defined by node name
         protected final TextFormat format; // defined in "content" node
@@ -393,6 +394,7 @@ public class TextTemplate implements TextRepresentable {
          * Represents a builder for {@link Arg}s.
          */
         public static class Builder {
+            
             protected final String name;
             protected boolean optional = false;
             protected TextFormat format = TextFormat.NONE;
