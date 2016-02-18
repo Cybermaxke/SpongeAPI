@@ -96,7 +96,7 @@ public class TextTemplate implements TextRepresentable {
                     throw new TextTemplateArgumentException("Tried to supply an unequal argument with a duplicate name \""
                             + newArg.name + "\" to TextTemplate.");
                 }
-                arguments.put(newArg.name, newArg);
+                this.arguments.put(newArg.name, newArg);
             }
         }
     }
@@ -125,7 +125,7 @@ public class TextTemplate implements TextRepresentable {
      * @return String containing args
      */
     public String getOpenArgString() {
-        return openArg;
+        return this.openArg;
     }
 
     /**
@@ -134,7 +134,7 @@ public class TextTemplate implements TextRepresentable {
      * @return String containing args
      */
     public String getCloseArgString() {
-        return closeArg;
+        return this.closeArg;
     }
 
     /**
@@ -328,7 +328,7 @@ public class TextTemplate implements TextRepresentable {
          * @return Argument name
          */
         public String getName() {
-            return name;
+            return this.name;
         }
 
         /**
@@ -339,7 +339,7 @@ public class TextTemplate implements TextRepresentable {
          * @return True if optional
          */
         public boolean isOptional() {
-            return optional;
+            return this.optional;
         }
 
         /**
@@ -348,7 +348,7 @@ public class TextTemplate implements TextRepresentable {
          * @return Base format
          */
         public TextFormat getFormat() {
-            return format;
+            return this.format;
         }
 
         /**
@@ -357,7 +357,7 @@ public class TextTemplate implements TextRepresentable {
          * @return Open string
          */
         public Optional<String> getOpenArgString() {
-            return Optional.ofNullable(openArg);
+            return Optional.ofNullable(this.openArg);
         }
 
         /**
@@ -366,7 +366,7 @@ public class TextTemplate implements TextRepresentable {
          * @return Close string
          */
         public Optional<String> getCloseArgString() {
-            return Optional.ofNullable(closeArg);
+            return Optional.ofNullable(this.closeArg);
         }
 
         @Override
@@ -409,7 +409,7 @@ public class TextTemplate implements TextRepresentable {
              * @return Newly created Arg
              */
             public Arg build() {
-                return new Arg(name, optional, format);
+                return new Arg(this.name, this.optional, this.format);
             }
 
             /**
