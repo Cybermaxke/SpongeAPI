@@ -28,6 +28,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextElement;
+import org.spongepowered.api.text.TextTemplate;
+
+import java.util.Map;
 
 /**
  * Represents something that can receive (and send) messages.
@@ -67,6 +71,17 @@ public interface MessageReceiver {
         for (Text message : checkNotNull(messages, "messages")) {
             this.sendMessage(message);
         }
+    }
+
+    /**
+     * Sends the result of the specified {@link TextTemplate} with the
+     * specified parameters to the receiver.
+     *
+     * @param template TextTemplate to evaluate
+     * @param params Parameters to apply to template
+     */
+    default void sendMessage(TextTemplate template, Map<String, TextElement> params) {
+        this.sendMessage(template.apply(params).build());
     }
 
     /**
