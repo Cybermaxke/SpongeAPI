@@ -94,7 +94,6 @@ public class TextTemplateConfigSerializer implements TypeSerializer<TextTemplate
     }
 
     private void parse(List<Object> into, Text content) {
-        Sponge.getServer().getConsole().sendMessage(content);
         if (isArg(content)) {
             parseArg(into, (LiteralText) content);
         } else {
