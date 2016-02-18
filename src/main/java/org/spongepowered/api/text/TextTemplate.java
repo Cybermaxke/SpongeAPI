@@ -89,6 +89,8 @@ public class TextTemplate implements TextRepresentable {
             if (element instanceof Arg) {
                 // check for non-equal duplicate argument
                 Arg newArg = (Arg) element;
+                newArg.openArg = this.openArg;
+                newArg.closeArg = this.closeArg;
                 Arg oldArg = this.arguments.get(newArg.name);
                 if (oldArg != null && !oldArg.equals(newArg)) {
                     throw new TextTemplateArgumentException("Tried to supply an unequal argument with a duplicate name \""
@@ -305,6 +307,7 @@ public class TextTemplate implements TextRepresentable {
         @Setting protected final boolean optional;
         protected final String name; // defined by node name
         protected final TextFormat format; // defined in "content" node
+        @Nullable protected String openArg, closeArg;
 
         protected Arg(String name, boolean optional, TextFormat format) {
             this.name = name;
@@ -350,7 +353,7 @@ public class TextTemplate implements TextRepresentable {
 
         @Override
         public Text toText() {
-            return Text.builder('{' + this.name + '}').format(this.format).build();
+            return Text.builder(openArg + this.name + closeArg).format(this.format).build();
         }
 
         @Override
