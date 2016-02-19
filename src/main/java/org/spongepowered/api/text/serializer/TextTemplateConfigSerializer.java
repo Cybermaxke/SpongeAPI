@@ -76,7 +76,7 @@ public class TextTemplateConfigSerializer implements TypeSerializer<TextTemplate
         this.closeArg = value.getNode(NODE_CLOSE_ARG).getString(TextTemplate.DEFAULT_CLOSE_ARG);
         Text content = value.getNode(NODE_CONTENT).getValue(TypeToken.of(Text.class));
         List<Object> elements = new ArrayList<>();
-        parse(elements, content);
+        parse(content, elements);
         return TextTemplate.of(elements.toArray(new Object[elements.size()]));
     }
 
@@ -92,16 +92,16 @@ public class TextTemplateConfigSerializer implements TypeSerializer<TextTemplate
         value.getNode(NODE_CONTENT).setValue(TypeToken.of(Text.class), obj.toText());
     }
 
-    private void parse(List<Object> into, Text content) {
+    private void parse(Text content, List<Object> into) {
         if (isArg(content)) {
-            parseArg(into, (LiteralText) content);
+            parseArg((LiteralText) content, into);
         } else {
             into.add(content.toBuilder().removeAll().build());
         }
-        content.getChildren().stream().forEach(c -> parse(into, c));
+        content.getChildren().stream().forEach(c -> parse(c, into));
     }
 
-    private void parseArg(List<Object> into, LiteralText source) {
+    private void parseArg(LiteralText source, List<Object> into) {
         String name = unwrap(source.getContent());
         boolean optional = this.root.getNode(NODE_ARGS, name, NODE_OPT).getBoolean();
         TextFormat format = source.getFormat();
