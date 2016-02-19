@@ -41,6 +41,7 @@ import org.spongepowered.api.text.serializer.TextTemplateConfigSerializer;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -50,7 +51,7 @@ import java.util.Optional;
  * {@link Text.Builder}. Elements will be appended to the result builder in the
  * order that they are specified in {@link #of(Object...)}.
  */
-public final class TextTemplate implements TextRepresentable {
+public final class TextTemplate implements TextRepresentable, Iterable<Object> {
 
     static {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(TextTemplate.class), new TextTemplateConfigSerializer());
@@ -311,13 +312,35 @@ public final class TextTemplate implements TextRepresentable {
     }
 
     @Override
+    public Iterator<Object> iterator() {
+        return this.elements.iterator();
+    }
+
+    @Override
     public String toString() {
-        return Objects.toStringHelper(TextTemplate.class)
+        return Objects.toStringHelper(this)
                 .add("elements", this.elements)
                 .add("arguments", this.arguments)
+                .add("text", this.text)
                 .add("openArg", this.openArg)
                 .add("closeArg", this.closeArg)
                 .toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.elements, this.openArg, this.closeArg);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof TextTemplate)) {
+            return false;
+        }
+        TextTemplate that = (TextTemplate) obj;
+        return that.elements.equals(this.elements)
+                && that.openArg.equals(this.openArg)
+                && that.closeArg.equals(this.closeArg);
     }
 
     /**
@@ -410,7 +433,7 @@ public final class TextTemplate implements TextRepresentable {
 
         @Override
         public String toString() {
-            return Objects.toStringHelper(Arg.class)
+            return Objects.toStringHelper(this)
                     .omitNullValues()
                     .add("optional", optional)
                     .add("name", name)
@@ -422,7 +445,7 @@ public final class TextTemplate implements TextRepresentable {
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(this.name, this.optional);
+            return Objects.hashCode(this.name, this.optional, this.openArg, this.closeArg);
         }
 
         @Override
@@ -431,7 +454,10 @@ public final class TextTemplate implements TextRepresentable {
                 return false;
             }
             Arg that = (Arg) obj;
-            return that.name.equals(this.name) && that.optional == this.optional;
+            return that.name.equals(this.name)
+                    && that.optional == this.optional
+                    && that.openArg.equals(this.openArg)
+                    && that.closeArg.equals(this.closeArg);
         }
 
         /**
@@ -512,6 +538,16 @@ public final class TextTemplate implements TextRepresentable {
             public Builder style(TextStyle style) {
                 this.format = this.format.style(style);
                 return this;
+            }
+
+            @Override
+            public String toString() {
+                return Objects.toStringHelper(this)
+                        .omitNullValues()
+                        .add("name", this.name)
+                        .add("optional", this.optional)
+                        .add("format", this.format.isEmpty() ? null : this.format)
+                        .toString();
             }
         }
     }
