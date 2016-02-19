@@ -309,7 +309,7 @@ public final class TextTemplate implements TextRepresentable, Iterable<Object> {
 
     @Override
     public Text toText() {
-        return text;
+        return this.text;
     }
 
     @Override
@@ -429,18 +429,18 @@ public final class TextTemplate implements TextRepresentable, Iterable<Object> {
 
         @Override
         public Text toText() {
-            return Text.builder(openArg + this.name + closeArg).format(this.format).build();
+            return Text.builder(this.openArg + this.name + this.closeArg).format(this.format).build();
         }
 
         @Override
         public String toString() {
             return Objects.toStringHelper(this)
                     .omitNullValues()
-                    .add("optional", optional)
-                    .add("name", name)
+                    .add("optional", this.optional)
+                    .add("name", this.name)
                     .add("format", this.format.isEmpty() ? null : this.format)
-                    .add("openArg", openArg)
-                    .add("closeArg", closeArg)
+                    .add("openArg", this.openArg)
+                    .add("closeArg", this.closeArg)
                     .toString();
         }
 
