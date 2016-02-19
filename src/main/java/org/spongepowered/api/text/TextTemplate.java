@@ -45,8 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-
 /**
  * Represents a re-usable template that produces a formatted
  * {@link Text.Builder}. Elements will be appended to the result builder in the
@@ -76,19 +74,21 @@ public final class TextTemplate implements TextRepresentable {
 
     final ImmutableList<Object> elements;
     final ImmutableMap<String, Arg> arguments;
+    final Text text;
     final String openArg;
     final String closeArg;
 
     TextTemplate(String openArg, String closeArg, Object[] elements) {
         this.openArg = openArg;
         this.closeArg = closeArg;
+
+        // collect elements
         ImmutableList.Builder<Object> elementList = ImmutableList.builder();
         Map<String, Arg> argumentMap = new HashMap<>();
         for (Object element : elements) {
             if (element instanceof Arg.Builder) {
                 element = ((Arg.Builder) element).build();
             }
-            elementList.add(element);
             if (element instanceof Arg) {
                 // check for non-equal duplicate argument
                 Arg newArg = new Arg((Arg) element, this.openArg, this.closeArg);
@@ -99,9 +99,17 @@ public final class TextTemplate implements TextRepresentable {
                 }
                 argumentMap.put(newArg.name, newArg);
             }
+            elementList.add(element);
         }
         this.elements = elementList.build();
         this.arguments = ImmutableMap.copyOf(argumentMap);
+
+        // build text representation
+        Text.Builder builder = null;
+        for (Object element : this.elements) {
+            builder = apply(element, builder);
+        }
+        this.text = Optional.ofNullable(builder).orElse(Text.builder()).build();
     }
 
     /**
@@ -141,6 +149,17 @@ public final class TextTemplate implements TextRepresentable {
     }
 
     /**
+     * Applies an empty map of parameters to this TextTemplate and returns the
+     * result in a {@link Text.Builder}.
+     *
+     * @return Text builder containing result
+     * @throws TextTemplateArgumentException if required parameters are missing
+     */
+    public Text.Builder apply() {
+        return apply(Collections.emptyMap());
+    }
+
+    /**
      * Applies the specified parameters to this TextTemplate and returns the
      * result in a {@link Text.Builder}.
      *
@@ -152,39 +171,41 @@ public final class TextTemplate implements TextRepresentable {
         checkNotNull("params");
         Text.Builder result = null;
         for (Object element : this.elements) {
-            result = apply(result, element, params);
+            result = apply(element, result, params);
         }
         return Optional.ofNullable(result).orElse(Text.builder());
     }
 
-    /**
-     * Applies an empty map of parameters to this TextTemplate and returns the
-     * result in a {@link Text.Builder}.
-     *
-     * @return Text builder containing result
-     * @throws TextTemplateArgumentException if required parameters are missing
-     */
-    public Text.Builder apply() {
-        return apply(Collections.emptyMap());
-    }
-
-    @Nullable
-    private Text.Builder apply(@Nullable Text.Builder builder, Object element, Map<String, TextElement> params) {
+    private Text.Builder apply(Object element, Text.Builder builder, Map<String, TextElement> params) {
         // Note: The builder is initialized as null to avoid unnecessary Text nesting
         if (element instanceof Arg) {
             Arg arg = (Arg) element;
             TextElement param = params.get(arg.name);
             if (param == null) {
-                arg.checkOptional(); // make sure param is allowed to be missing
+                arg.checkOptional();
             } else {
                 // wrap the parameter in the argument format
                 Text.Builder wrapper = Text.builder().format(arg.format);
                 param.applyTo(wrapper);
                 if (builder == null) {
-                    builder = wrapper; // set wrapper to "root" Text
+                    builder = wrapper;
                 } else {
                     builder.append(wrapper.build());
                 }
+            }
+        } else {
+            builder = apply(element, builder);
+        }
+        return builder;
+    }
+
+    private Text.Builder apply(Object element, Text.Builder builder) {
+        if (element instanceof Text) {
+            Text text = (Text) element;
+            if (builder == null) {
+                builder = text.toBuilder();
+            } else {
+                builder.append(text);
             }
         } else if (element instanceof TextElement) {
             if (builder == null) {
@@ -194,7 +215,7 @@ public final class TextTemplate implements TextRepresentable {
         } else {
             String str = element.toString();
             if (builder == null) {
-                builder = Text.builder(str); // set String to "root" Text
+                builder = Text.builder(str);
             } else {
                 builder.append(Text.of(str));
             }
@@ -228,9 +249,9 @@ public final class TextTemplate implements TextRepresentable {
      */
     public static TextTemplate of(String openArg, String closeArg, Object[] elements) {
         checkNotNull(openArg, "open arg");
-        checkArgument(!openArg.isEmpty(), "openArg cannot be empty");
+        checkArgument(!openArg.isEmpty(), "open arg cannot be empty");
         checkNotNull(closeArg, "close arg");
-        checkArgument(!closeArg.isEmpty(), "closeArg cannot be empty");
+        checkArgument(!closeArg.isEmpty(), "close arg cannot be empty");
         checkNotNull(elements, "elements");
         if (elements.length == 0) {
             return of();
@@ -286,23 +307,7 @@ public final class TextTemplate implements TextRepresentable {
 
     @Override
     public Text toText() {
-        Text.Builder builder = null;
-        for (Object element : this.elements) {
-            if (element instanceof TextElement) {
-                if (builder == null) {
-                    builder = Text.builder();
-                }
-                ((TextElement) element).applyTo(builder);
-            } else {
-                String str = element.toString();
-                if (builder == null) {
-                    builder = Text.builder(str);
-                } else {
-                    builder.append(Text.of(str));
-                }
-            }
-        }
-        return Optional.ofNullable(builder).orElse(Text.builder()).build();
+        return text;
     }
 
     @Override

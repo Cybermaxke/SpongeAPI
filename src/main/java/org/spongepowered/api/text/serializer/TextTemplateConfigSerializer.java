@@ -28,7 +28,6 @@ import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextTemplate;
@@ -103,11 +102,10 @@ public class TextTemplateConfigSerializer implements TypeSerializer<TextTemplate
     }
 
     private void parseArg(List<Object> into, LiteralText source) {
-        String name = unwrap(source.getContent(), this.openArg, this.closeArg);
+        String name = unwrap(source.getContent());
         boolean optional = this.root.getNode(NODE_ARGS, name, NODE_OPT).getBoolean();
         TextFormat format = source.getFormat();
-        TextTemplate.Arg arg = TextTemplate.arg(name).format(format).optional(optional).build();
-        into.add(arg);
+        into.add(TextTemplate.arg(name).format(format).optional(optional).build());
     }
 
     private boolean isArg(Text element) {
@@ -116,15 +114,15 @@ public class TextTemplateConfigSerializer implements TypeSerializer<TextTemplate
         }
         String literal = ((LiteralText) element).getContent();
         return literal.startsWith(this.openArg) && literal.endsWith(this.closeArg)
-                && isArgDefined(unwrap(literal, this.openArg, this.closeArg), this.root);
+                && isArgDefined(unwrap(literal));
     }
 
-    private static String unwrap(String str, String openArg, String closeArg) {
-        return str.substring(openArg.length(), str.length() - closeArg.length());
+    private String unwrap(String str) {
+        return str.substring(this.openArg.length(), str.length() - this.closeArg.length());
     }
 
 
-    private static boolean isArgDefined(String argName, ConfigurationNode root) {
-        return !root.getNode(NODE_ARGS, argName).isVirtual();
+    private boolean isArgDefined(String argName) {
+        return !this.root.getNode(NODE_ARGS, argName).isVirtual();
     }
 }
