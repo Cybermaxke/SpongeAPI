@@ -99,6 +99,7 @@ public final class TextTemplate implements TextRepresentable, Iterable<Object> {
                             + newArg.name + "\" to TextTemplate.");
                 }
                 argumentMap.put(newArg.name, newArg);
+                element = newArg;
             }
             elementList.add(element);
         }
