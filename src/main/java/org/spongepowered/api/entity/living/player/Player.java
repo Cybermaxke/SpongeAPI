@@ -25,6 +25,7 @@
 package org.spongepowered.api.entity.living.player;
 
 import org.spongepowered.api.Server;
+import org.spongepowered.api.keyboard.KeyBinding;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.command.source.RemoteSource;
 import org.spongepowered.api.data.key.Keys;
@@ -48,6 +49,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatVisibility;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
@@ -258,5 +260,14 @@ public interface Player extends Humanoid, User, Locatable, RemoteSource, Viewer,
      *     checking whether to skip the night
      */
     void setSleepingIgnored(boolean sleepingIgnored);
+
+    /**
+     * Gets all the {@link KeyBinding}s that are available for this {@link Player},
+     * if the player doesn't have a client that supports custom key bindings this
+     * will always return a empty collection.
+     *
+     * @return The key bindings
+     */
+    Collection<KeyBinding> getKeyBindings();
 
 }
